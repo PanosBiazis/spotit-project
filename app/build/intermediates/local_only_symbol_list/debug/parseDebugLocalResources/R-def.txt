@@ -1,0 +1,13 @@
+R_DEF: Internal format may change without notice
+local
+color ic_launcher_background
+drawable ic_history
+drawable ic_home
+drawable ic_launcher_foreground
+drawable ic_settings
+drawable ic_shield
+drawable ic_shield_inset
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Theme.SPOTit

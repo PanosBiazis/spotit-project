@@ -1,0 +1,8 @@
+com.spotit.app-pngs-0 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/generated/res/pngs/debug
+com.spotit.app-resValues-1 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/generated/res/resValues/debug
+com.spotit.app-updated_navigation_xml-2 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/generated/updated_navigation_xml/debug
+com.spotit.app-packageDebugResources-3 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.spotit.app-packageDebugResources-4 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.spotit.app-debug-5 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.spotit.app-debug-6 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/debug/res
+com.spotit.app-main-7 /home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/res

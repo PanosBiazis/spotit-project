@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * SPOTit Anti-Theft Application
+ *
+ * AndroidManifest.xml - Application Manifest
+ *
+ * This is the Android application manifest file that defines the essential
+ * information about the SPOTit anti-theft application. It declares all
+ * components, permissions, and hardware requirements needed for the app
+ * to function correctly.
+ *
+ * Manifest Contents:
+ * 1. Package declaration and application metadata
+ * 2. Permissions required for anti-theft functionality
+ * 3. Hardware feature requirements
+ * 4. Activity declaration (main UI entry point)
+ * 5. Service declaration (background monitoring)
+ *
+ * @author Panos Biazis
+ * @date 10/4/2026
+ * @version 2.0
+ *
+ * Copyright (c) 2026 Panos Biazis. All rights reserved.
+ */
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- =========================================================================
+         PERMISSIONS - Required Application Permissions
+         ========================================================================= -->
+
+    <!--
+    VIBRATE Permission
+
+    Allows the application to use the device's vibrator for alarm feedback.
+
+    Usage: Vibration pattern when motion is detected (alert signal).
+    Type: Normal permission (automatically granted, no user prompt needed).
+
+    When motion is detected and the alarm triggers, the device vibrates in
+    a repeating pattern to alert the user and potentially scare off thieves.
+    -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+    WAKE_LOCK Permission
+
+    Allows the application to keep the device awake while monitoring.
+
+    Usage: Ensures the monitoring service continues running even when the
+    screen is off. This is critical for anti-theft protection.
+    Type: Normal permission (automatically granted).
+
+    The foreground service uses wake lock internally to ensure continuous
+    monitoring even when the device enters low-power states.
+    -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!--
+    POST_NOTIFICATIONS Permission
+
+    Required for Android 13+ (API 33+) to show notifications.
+
+    Usage: Displays the foreground service notification that indicates
+    "Monitoring active" or "ALARM" status.
+    Type: Dangerous permission (user must grant explicitly).
+
+    Without this permission on Android 13+, the foreground service
+    notification would not be visible, violating Android's foreground
+    service requirements.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+    SEND_SMS Permission
+
+    Allows sending SMS messages to the emergency contact.
+
+    Usage: Core functionality - sends SMS alerts with location information
+    to the configured emergency contact when motion is detected.
+    Type: Dangerous permission (user must grant explicitly).
+
+    This is essential for the anti-theft functionality. When motion is
+    detected, SMS messages are sent every 5 seconds containing the alert
+    and current GPS coordinates.
+
+    Security Note: This permission allows sending SMS without user
+    interaction. Users are informed about this during app setup.
+    -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <!--
+    ACCESS_FINE_LOCATION Permission
+
+    Provides GPS-level location accuracy (~10 meters).
+
+    Usage: Captures precise device location for inclusion in SMS alerts.
+    Type: Dangerous permission (user must grant explicitly).
+
+    Fine location provides the best accuracy for tracking a stolen device.
+    The coordinates are included in SMS messages to help locate the device.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!--
+    ACCESS_COARSE_LOCATION Permission
+
+    Provides network-level location accuracy (~100 meters).
+
+    Usage: Fallback location source when fine location is unavailable or
+    when user only grants coarse permission.
+    Type: Dangerous permission (user must grant explicitly).
+
+    Coarse location uses cell towers and WiFi networks to determine
+    approximate location. Less accurate but uses less battery than GPS.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!--
+    ACCESS_BACKGROUND_LOCATION Permission
+
+    Allows location access while app is in background.
+
+    Usage: Critical for anti-theft - the app must track location even when
+    not visible to the user, as theft can occur at any time.
+    Type: Dangerous permission (requires special user approval flow).
+
+    JUSTIFICATION FOR BACKGROUND LOCATION:
+    This is required for SPOTit's core security functionality:
+    - Detects motion/intrusion and immediately captures device location
+    - Sends location-based alerts via SMS even when app is not visible
+    - Core use case: Anti-theft/security monitoring where user initiates
+      monitoring and expects location tracking to work continuously
+    - User explicitly grants this permission after being informed of its
+      purpose through the Android permission dialog
+
+    Note: On Android 10+, users must grant location permission first,
+    then separately grant "Allow all the time" for background access.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!--
+    FOREGROUND_SERVICE Permission
+
+    Allows running a foreground service with a persistent notification.
+
+    Usage: Required for the SpotItForegroundService that monitors for motion.
+    Type: Normal permission (automatically granted).
+
+    Without this, the service would be killed by the system when the app
+    goes to background, making anti-theft protection impossible.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!--
+    FOREGROUND_SERVICE_LOCATION Permission
+
+    Specifies the type of foreground service (location) for Android 14+.
+
+    Usage: Declares that the foreground service accesses location data.
+    Type: Normal permission (automatically granted if FOREGROUND_SERVICE granted).
+
+    Required on Android 14+ (API 34+) for foreground services that access
+    location. This declaration allows the system to properly manage the
+    service and show appropriate user notifications.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <!-- =========================================================================
+         HARDWARE FEATURES - Required Device Capabilities
+         ========================================================================= -->
+
+    <!--
+    Accelerometer Sensor Feature
+
+    The accelerometer is REQUIRED for motion detection.
+
+    This feature is essential because the entire anti-theft functionality
+    depends on detecting device movement through the accelerometer sensor.
+
+    android:required="true" means:
+    - The app will NOT be available on devices without an accelerometer
+    - Google Play Store will filter out incompatible devices
+    - Almost all modern Android devices have this sensor
+
+    Note: We use either TYPE_LINEAR_ACCELERATION (preferred) or
+    TYPE_ACCELEROMETER (fallback) for motion detection.
+    -->
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true" />
+
+    <!--
+    GPS Feature
+
+    GPS is NOT required (optional) for the app to function.
+
+    android:required="false" means:
+    - The app works on devices without GPS
+    - Location will show "Location not available" if no GPS
+    - Network-based location may still work
+
+    This allows the app to be installed on devices that only have
+    network-based location (like some tablets).
+    -->
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
+    <!--
+    Telephony Feature
+
+    Telephony is NOT required (optional) for the app to function.
+
+    android:required="false" means:
+    - The app can be installed on devices without cellular capability
+    - SMS sending will fail silently on such devices
+    - Other features (motion detection, alarm) will still work
+
+    This allows the app to be installed on WiFi-only tablets, though
+    SMS alerts won't be available on those devices.
+    -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <!-- =========================================================================
+         APPLICATION DECLARATION
+         ========================================================================= -->
+
+    <!--
+    Application Element
+
+    Defines the application's global configuration and components.
+
+    Attributes:
+    - allowBackup: true - Allows system to backup/restore app data
+    - icon: App launcher icon (mipmap resource)
+    - label: App name displayed to users "SPOTit"
+    - supportsRtl: true - Supports right-to-left language layouts
+    - theme: Application theme resource
+    -->
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="SPOTit"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SPOTit">
+
+        <!-- =====================================================================
+             MAIN ACTIVITY - Primary User Interface
+             ===================================================================== -->
+
+        <!--
+        MainActivity Declaration
+
+        The main entry point of the application.
+
+        This activity handles:
+        - Permission requests and management
+        - Navigation between Home, Settings, and History screens
+        - Pattern lock display for secure monitoring stop
+        - UI state observation from ViewModel
+
+        Attributes:
+        - exported: true - Can be launched by system (from launcher)
+        - name: Fully qualified class name for the activity
+
+        Intent Filters:
+        - MAIN action: Entry point for application launch
+        - LAUNCHER category: Shows app in system launcher
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+
+            <!--
+            Intent Filter for Launcher
+
+            Makes this activity the app's main entry point.
+
+            ACTION_MAIN: Indicates this is a main entry point.
+            CATEGORY_LAUNCHER: Adds app icon to the system launcher.
+
+            Without this filter, the app would not appear in the
+            app drawer or home screen.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- =====================================================================
+             FOREGROUND SERVICE - Background Monitoring
+             ===================================================================== -->
+
+        <!--
+        SpotItForegroundService Declaration
+
+        Background service that performs the core anti-theft monitoring.
+
+        This service is responsible for:
+        - Listening to accelerometer for motion detection
+        - Playing alarm sound and vibration when triggered
+        - Sending SMS alerts to emergency contact
+        - Managing location updates for alerts
+
+        Attributes:
+        - name: Service class name
+        - enabled: true - Service can be instantiated
+        - exported: false - Cannot be invoked by other apps (security)
+        - foregroundServiceType: "location" - Required for Android 14+
+
+        Foreground Service Type: "location"
+
+        Required on Android 14+ (API 34+). Indicates this service accesses
+        device location. This is essential for SPOTit's security functionality:
+
+        - Captures GPS coordinates when motion is detected
+        - Includes location in SMS alerts for device tracking
+        - Core use case: Anti-theft monitoring where user explicitly
+          initiates monitoring and expects continuous location tracking
+
+        The system uses this declaration to:
+        - Show appropriate notification to user
+        - Manage battery and resource usage
+        - Ensure proper permissions are granted
+
+        Security: exported="false" prevents other apps from starting
+        or binding to this service, protecting against malicious apps.
+        -->
+        <service
+            android:name=".service.SpotItForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+    </application>
+
+</manifest>
+
+<!--
+================================================================================
+MANIFEST DOCUMENTATION SUMMARY
+================================================================================
+
+PERMISSIONS OVERVIEW:
+
+1. VIBRATE - Alarm vibration feedback (normal)
+2. WAKE_LOCK - Keep device awake during monitoring (normal)
+3. POST_NOTIFICATIONS - Show foreground service notification (dangerous, API 33+)
+4. SEND_SMS - Send security alerts (dangerous)
+5. ACCESS_FINE_LOCATION - GPS accuracy (dangerous)
+6. ACCESS_COARSE_LOCATION - Network location (dangerous)
+7. ACCESS_BACKGROUND_LOCATION - Location when app backgrounded (dangerous)
+8. FOREGROUND_SERVICE - Run foreground service (normal)
+9. FOREGROUND_SERVICE_LOCATION - Location service type (normal, API 34+)
+
+HARDWARE REQUIREMENTS:
+
+- Accelerometer: REQUIRED (core functionality)
+- GPS: Optional (works without, but limited)
+- Telephony: Optional (works without, no SMS)
+
+COMPONENTS DECLARED:
+
+1. MainActivity - Main UI entry point
+   - exported: true (can be launched from launcher)
+   - Intent filters: MAIN + LAUNCHER
+
+2. SpotItForegroundService - Background monitoring
+   - enabled: true (can be instantiated)
+   - exported: false (security - no external access)
+   - foregroundServiceType: location
+
+SECURITY CONSIDERATIONS:
+
+- Service is not exported (prevents external control)
+- All dangerous permissions require user grant
+- Background location justified for core functionality
+- Location data only used for security alerts
+
+ANDROID VERSION COMPATIBILITY:
+
+- Min SDK: 26 (Android 8.0)
+- Target SDK: 35 (Android 15)
+- POST_NOTIFICATIONS required for API 33+
+- FOREGROUND_SERVICE_LOCATION required for API 34+
+- Background location handling varies by Android version
+
+FUTURE CONSIDERATIONS:
+
+1. Add biometric permission for fingerprint unlock
+2. Add camera permission for photo capture on alert
+3. Add microphone permission for audio recording
+4. Consider adding READ_PHONE_STATE for device info
+5. May need to update permissions for future Android versions
+================================================================================
+-->

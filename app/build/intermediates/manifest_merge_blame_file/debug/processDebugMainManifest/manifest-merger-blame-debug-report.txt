@@ -1,0 +1,573 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3/**
+4 * SPOTit Anti-Theft Application
+5 *
+6 * AndroidManifest.xml - Application Manifest
+7 *
+8 * This is the Android application manifest file that defines the essential
+9 * information about the SPOTit anti-theft application. It declares all
+10 * components, permissions, and hardware requirements needed for the app
+11 * to function correctly.
+12 *
+13 * Manifest Contents:
+14 * 1. Package declaration and application metadata
+15 * 2. Permissions required for anti-theft functionality
+16 * 3. Hardware feature requirements
+17 * 4. Activity declaration (main UI entry point)
+18 * 5. Service declaration (background monitoring)
+19 *
+20 * @author Panos Biazis
+21 * @date 10/4/2026
+22 * @version 2.0
+23 *
+24 * Copyright (c) 2026 Panos Biazis. All rights reserved.
+25 */
+26-->
+27<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+28    package="com.spotit"
+29    android:versionCode="2"
+30    android:versionName="2.0" >
+31
+32    <uses-sdk
+32-->INJECTED
+33        android:minSdkVersion="26"
+33-->INJECTED
+34        android:targetSdkVersion="35" />
+34-->INJECTED
+35
+36    <!--
+37         =========================================================================
+38         PERMISSIONS - Required Application Permissions
+39         =========================================================================
+40    -->
+41
+42
+43    <!--
+44    VIBRATE Permission
+45
+46    Allows the application to use the device's vibrator for alarm feedback.
+47
+48    Usage: Vibration pattern when motion is detected (alert signal).
+49    Type: Normal permission (automatically granted, no user prompt needed).
+50
+51    When motion is detected and the alarm triggers, the device vibrates in
+52    a repeating pattern to alert the user and potentially scare off thieves.
+53    -->
+54    <uses-permission android:name="android.permission.VIBRATE" />
+54-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:44:5-66
+54-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:44:22-63
+55
+56    <!--
+57    WAKE_LOCK Permission
+58
+59    Allows the application to keep the device awake while monitoring.
+60
+61    Usage: Ensures the monitoring service continues running even when the
+62    screen is off. This is critical for anti-theft protection.
+63    Type: Normal permission (automatically granted).
+64
+65    The foreground service uses wake lock internally to ensure continuous
+66    monitoring even when the device enters low-power states.
+67    -->
+68    <uses-permission android:name="android.permission.WAKE_LOCK" />
+68-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:58:5-68
+68-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:58:22-65
+69
+70    <!--
+71    POST_NOTIFICATIONS Permission
+72
+73    Required for Android 13+ (API 33+) to show notifications.
+74
+75    Usage: Displays the foreground service notification that indicates
+76    "Monitoring active" or "ALARM" status.
+77    Type: Dangerous permission (user must grant explicitly).
+78
+79    Without this permission on Android 13+, the foreground service
+80    notification would not be visible, violating Android's foreground
+81    service requirements.
+82    -->
+83    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+83-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:73:5-77
+83-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:73:22-74
+84
+85    <!--
+86    SEND_SMS Permission
+87
+88    Allows sending SMS messages to the emergency contact.
+89
+90    Usage: Core functionality - sends SMS alerts with location information
+91    to the configured emergency contact when motion is detected.
+92    Type: Dangerous permission (user must grant explicitly).
+93
+94    This is essential for the anti-theft functionality. When motion is
+95    detected, SMS messages are sent every 5 seconds containing the alert
+96    and current GPS coordinates.
+97
+98    Security Note: This permission allows sending SMS without user
+99    interaction. Users are informed about this during app setup.
+100    -->
+101    <uses-permission android:name="android.permission.SEND_SMS" />
+101-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:91:5-67
+101-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:91:22-64
+102
+103    <!--
+104    ACCESS_FINE_LOCATION Permission
+105
+106    Provides GPS-level location accuracy (~10 meters).
+107
+108    Usage: Captures precise device location for inclusion in SMS alerts.
+109    Type: Dangerous permission (user must grant explicitly).
+110
+111    Fine location provides the best accuracy for tracking a stolen device.
+112    The coordinates are included in SMS messages to help locate the device.
+113    -->
+114    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+114-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:104:5-79
+114-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:104:22-76
+115
+116    <!--
+117    ACCESS_COARSE_LOCATION Permission
+118
+119    Provides network-level location accuracy (~100 meters).
+120
+121    Usage: Fallback location source when fine location is unavailable or
+122    when user only grants coarse permission.
+123    Type: Dangerous permission (user must grant explicitly).
+124
+125    Coarse location uses cell towers and WiFi networks to determine
+126    approximate location. Less accurate but uses less battery than GPS.
+127    -->
+128    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+128-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:118:5-81
+128-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:118:22-78
+129
+130    <!--
+131    ACCESS_BACKGROUND_LOCATION Permission
+132
+133    Allows location access while app is in background.
+134
+135    Usage: Critical for anti-theft - the app must track location even when
+136    not visible to the user, as theft can occur at any time.
+137    Type: Dangerous permission (requires special user approval flow).
+138
+139    JUSTIFICATION FOR BACKGROUND LOCATION:
+140    This is required for SPOTit's core security functionality:
+141    - Detects motion/intrusion and immediately captures device location
+142    - Sends location-based alerts via SMS even when app is not visible
+143    - Core use case: Anti-theft/security monitoring where user initiates
+144      monitoring and expects location tracking to work continuously
+145    - User explicitly grants this permission after being informed of its
+146      purpose through the Android permission dialog
+147
+148    Note: On Android 10+, users must grant location permission first,
+149    then separately grant "Allow all the time" for background access.
+150    -->
+151    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+151-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:141:5-85
+151-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:141:22-82
+152
+153    <!--
+154    FOREGROUND_SERVICE Permission
+155
+156    Allows running a foreground service with a persistent notification.
+157
+158    Usage: Required for the SpotItForegroundService that monitors for motion.
+159    Type: Normal permission (automatically granted).
+160
+161    Without this, the service would be killed by the system when the app
+162    goes to background, making anti-theft protection impossible.
+163    -->
+164    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+164-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:154:5-77
+164-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:154:22-74
+165
+166    <!--
+167    FOREGROUND_SERVICE_LOCATION Permission
+168
+169    Specifies the type of foreground service (location) for Android 14+.
+170
+171    Usage: Declares that the foreground service accesses location data.
+172    Type: Normal permission (automatically granted if FOREGROUND_SERVICE granted).
+173
+174    Required on Android 14+ (API 34+) for foreground services that access
+175    location. This declaration allows the system to properly manage the
+176    service and show appropriate user notifications.
+177    -->
+178    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+178-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:168:5-86
+178-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:168:22-83
+179
+180    <!--
+181         =========================================================================
+182         HARDWARE FEATURES - Required Device Capabilities
+183         =========================================================================
+184    -->
+185
+186
+187    <!--
+188    Accelerometer Sensor Feature
+189
+190    The accelerometer is REQUIRED for motion detection.
+191
+192    This feature is essential because the entire anti-theft functionality
+193    depends on detecting device movement through the accelerometer sensor.
+194
+195    android:required="true" means:
+196    - The app will NOT be available on devices without an accelerometer
+197    - Google Play Store will filter out incompatible devices
+198    - Almost all modern Android devices have this sensor
+199
+200    Note: We use either TYPE_LINEAR_ACCELERATION (preferred) or
+201    TYPE_ACCELEROMETER (fallback) for motion detection.
+202    -->
+203    <uses-feature
+203-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:190:5-192:35
+204        android:name="android.hardware.sensor.accelerometer"
+204-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:191:9-61
+205        android:required="true" />
+205-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:192:9-32
+206
+207    <!--
+208    GPS Feature
+209
+210    GPS is NOT required (optional) for the app to function.
+211
+212    android:required="false" means:
+213    - The app works on devices without GPS
+214    - Location will show "Location not available" if no GPS
+215    - Network-based location may still work
+216
+217    This allows the app to be installed on devices that only have
+218    network-based location (like some tablets).
+219    -->
+220    <uses-feature
+220-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:207:5-209:36
+221        android:name="android.hardware.location.gps"
+221-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:208:9-53
+222        android:required="false" />
+222-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:209:9-33
+223
+224    <!--
+225    Telephony Feature
+226
+227    Telephony is NOT required (optional) for the app to function.
+228
+229    android:required="false" means:
+230    - The app can be installed on devices without cellular capability
+231    - SMS sending will fail silently on such devices
+232    - Other features (motion detection, alarm) will still work
+233
+234    This allows the app to be installed on WiFi-only tablets, though
+235    SMS alerts won't be available on those devices.
+236    -->
+237    <uses-feature
+237-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:224:5-226:36
+238        android:name="android.hardware.telephony"
+238-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:225:9-50
+239        android:required="false" />
+239-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:226:9-33
+240
+241    <permission
+241-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+242        android:name="com.spotit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+242-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+243        android:protectionLevel="signature" />
+243-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+244
+245    <uses-permission android:name="com.spotit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+245-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+245-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+246    <!--
+247 =========================================================================
+248         APPLICATION DECLARATION
+249         =========================================================================
+250    -->
+251    <!--
+252    Application Element
+253
+254    Defines the application's global configuration and components.
+255
+256    Attributes:
+257    - allowBackup: true - Allows system to backup/restore app data
+258    - icon: App launcher icon (mipmap resource)
+259    - label: App name displayed to users "SPOTit"
+260    - supportsRtl: true - Supports right-to-left language layouts
+261    - theme: Application theme resource
+262    -->
+263    <application
+263-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:244:5-340:19
+264        android:allowBackup="true"
+264-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:245:9-35
+265        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+265-->[androidx.core:core:1.15.0] /home/panosboy/.gradle/caches/9.3.1/transforms/58a4c118786b6ddb1e507ebc997d0f0a/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+266        android:debuggable="true"
+267        android:extractNativeLibs="false"
+267-->INJECTED
+268        android:icon="@mipmap/ic_launcher"
+268-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:246:9-43
+269        android:label="SPOTit"
+269-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:247:9-31
+270        android:supportsRtl="true"
+270-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:248:9-35
+271        android:testOnly="true"
+272        android:theme="@style/Theme.SPOTit" >
+272-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:249:9-44
+273
+274        <!--
+275             =====================================================================
+276             MAIN ACTIVITY - Primary User Interface
+277             =====================================================================
+278        -->
+279
+280
+281        <!--
+282        MainActivity Declaration
+283
+284        The main entry point of the application.
+285
+286        This activity handles:
+287        - Permission requests and management
+288        - Navigation between Home, Settings, and History screens
+289        - Pattern lock display for secure monitoring stop
+290        - UI state observation from ViewModel
+291
+292        Attributes:
+293        - exported: true - Can be launched by system (from launcher)
+294        - name: Fully qualified class name for the activity
+295
+296        Intent Filters:
+297        - MAIN action: Entry point for application launch
+298        - LAUNCHER category: Shows app in system launcher
+299        -->
+300        <activity
+300-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:274:9-293:20
+301            android:name="com.spotit.MainActivity"
+301-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:275:13-41
+302            android:exported="true" >
+302-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:276:13-36
+303
+304            <!--
+305            Intent Filter for Launcher
+306
+307            Makes this activity the app's main entry point.
+308
+309            ACTION_MAIN: Indicates this is a main entry point.
+310            CATEGORY_LAUNCHER: Adds app icon to the system launcher.
+311
+312            Without this filter, the app would not appear in the
+313            app drawer or home screen.
+314            -->
+315            <intent-filter>
+315-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:289:13-292:29
+316                <action android:name="android.intent.action.MAIN" />
+316-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:290:17-69
+316-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:290:25-66
+317
+318                <category android:name="android.intent.category.LAUNCHER" />
+318-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:291:17-77
+318-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:291:27-74
+319            </intent-filter>
+320        </activity>
+321
+322        <!--
+323             =====================================================================
+324             FOREGROUND SERVICE - Background Monitoring
+325             =====================================================================
+326        -->
+327
+328
+329        <!--
+330        SpotItForegroundService Declaration
+331
+332        Background service that performs the core anti-theft monitoring.
+333
+334        This service is responsible for:
+335        - Listening to accelerometer for motion detection
+336        - Playing alarm sound and vibration when triggered
+337        - Sending SMS alerts to emergency contact
+338        - Managing location updates for alerts
+339
+340        Attributes:
+341        - name: Service class name
+342        - enabled: true - Service can be instantiated
+343        - exported: false - Cannot be invoked by other apps (security)
+344        - foregroundServiceType: "location" - Required for Android 14+
+345
+346        Foreground Service Type: "location"
+347
+348        Required on Android 14+ (API 34+). Indicates this service accesses
+349        device location. This is essential for SPOTit's security functionality:
+350
+351        - Captures GPS coordinates when motion is detected
+352        - Includes location in SMS alerts for device tracking
+353        - Core use case: Anti-theft monitoring where user explicitly
+354          initiates monitoring and expects continuous location tracking
+355
+356        The system uses this declaration to:
+357        - Show appropriate notification to user
+358        - Manage battery and resource usage
+359        - Ensure proper permissions are granted
+360
+361        Security: exported="false" prevents other apps from starting
+362        or binding to this service, protecting against malicious apps.
+363        -->
+364        <service
+364-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:334:9-338:56
+365            android:name="com.spotit.service.SpotItForegroundService"
+365-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:335:13-60
+366            android:enabled="true"
+366-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:336:13-35
+367            android:exported="false"
+367-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:337:13-37
+368            android:foregroundServiceType="location" />
+368-->/home/panosboy/Documents/androidstudio/projects/spotit-project/app/src/main/AndroidManifest.xml:338:13-53
+369
+370        <activity
+370-->[com.google.android.gms:play-services-base:18.5.0] /home/panosboy/.gradle/caches/9.3.1/transforms/0fec78fe1713e77791d5a669c0c0b7bc/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+371            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+371-->[com.google.android.gms:play-services-base:18.5.0] /home/panosboy/.gradle/caches/9.3.1/transforms/0fec78fe1713e77791d5a669c0c0b7bc/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+372            android:exported="false"
+372-->[com.google.android.gms:play-services-base:18.5.0] /home/panosboy/.gradle/caches/9.3.1/transforms/0fec78fe1713e77791d5a669c0c0b7bc/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+373            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+373-->[com.google.android.gms:play-services-base:18.5.0] /home/panosboy/.gradle/caches/9.3.1/transforms/0fec78fe1713e77791d5a669c0c0b7bc/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+374
+375        <meta-data
+375-->[com.google.android.gms:play-services-basement:18.4.0] /home/panosboy/.gradle/caches/9.3.1/transforms/67774249c00b1beb385726be136f740d/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:9-122
+376            android:name="com.google.android.gms.version"
+376-->[com.google.android.gms:play-services-basement:18.4.0] /home/panosboy/.gradle/caches/9.3.1/transforms/67774249c00b1beb385726be136f740d/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:20-65
+377            android:value="@integer/google_play_services_version" />
+377-->[com.google.android.gms:play-services-basement:18.4.0] /home/panosboy/.gradle/caches/9.3.1/transforms/67774249c00b1beb385726be136f740d/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:66-119
+378
+379        <activity
+379-->[androidx.compose.ui:ui-tooling-android:1.7.0] /home/panosboy/.gradle/caches/9.3.1/transforms/526013257e38142c3537b7dd3183ca15/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+380            android:name="androidx.compose.ui.tooling.PreviewActivity"
+380-->[androidx.compose.ui:ui-tooling-android:1.7.0] /home/panosboy/.gradle/caches/9.3.1/transforms/526013257e38142c3537b7dd3183ca15/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+381            android:exported="true" />
+381-->[androidx.compose.ui:ui-tooling-android:1.7.0] /home/panosboy/.gradle/caches/9.3.1/transforms/526013257e38142c3537b7dd3183ca15/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+382
+383        <provider
+383-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+384            android:name="androidx.startup.InitializationProvider"
+384-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+385            android:authorities="com.spotit.androidx-startup"
+385-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+386            android:exported="false" >
+386-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+387            <meta-data
+387-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+388                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+388-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+389                android:value="androidx.startup" />
+389-->[androidx.emoji2:emoji2:1.3.0] /home/panosboy/.gradle/caches/9.3.1/transforms/c2677622b6a6c7a71f8122fa6b621ee0/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+390            <meta-data
+390-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/panosboy/.gradle/caches/9.3.1/transforms/f85105891daf7e1b3744e81e91410532/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+391                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+391-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/panosboy/.gradle/caches/9.3.1/transforms/f85105891daf7e1b3744e81e91410532/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+392                android:value="androidx.startup" />
+392-->[androidx.lifecycle:lifecycle-process:2.8.7] /home/panosboy/.gradle/caches/9.3.1/transforms/f85105891daf7e1b3744e81e91410532/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+393            <meta-data
+393-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+394                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+394-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+395                android:value="androidx.startup" />
+395-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+396        </provider>
+397
+398        <receiver
+398-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+399            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+399-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+400            android:directBootAware="false"
+400-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+401            android:enabled="true"
+401-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+402            android:exported="true"
+402-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+403            android:permission="android.permission.DUMP" >
+403-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+404            <intent-filter>
+404-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+405                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+405-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+405-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+406            </intent-filter>
+407            <intent-filter>
+407-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+408                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+408-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+408-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+409            </intent-filter>
+410            <intent-filter>
+410-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+411                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+411-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+411-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+412            </intent-filter>
+413            <intent-filter>
+413-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+414                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+414-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+414-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/panosboy/.gradle/caches/9.3.1/transforms/10031bd9c674a20abb035cc7ecef6f26/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+415            </intent-filter>
+416        </receiver>
+417    </application>
+418
+419</manifest><!--
+420================================================================================
+421MANIFEST DOCUMENTATION SUMMARY
+422================================================================================
+423
+424PERMISSIONS OVERVIEW:
+425
+4261. VIBRATE - Alarm vibration feedback (normal)
+4272. WAKE_LOCK - Keep device awake during monitoring (normal)
+4283. POST_NOTIFICATIONS - Show foreground service notification (dangerous, API 33+)
+4294. SEND_SMS - Send security alerts (dangerous)
+4305. ACCESS_FINE_LOCATION - GPS accuracy (dangerous)
+4316. ACCESS_COARSE_LOCATION - Network location (dangerous)
+4327. ACCESS_BACKGROUND_LOCATION - Location when app backgrounded (dangerous)
+4338. FOREGROUND_SERVICE - Run foreground service (normal)
+4349. FOREGROUND_SERVICE_LOCATION - Location service type (normal, API 34+)
+435
+436HARDWARE REQUIREMENTS:
+437
+438- Accelerometer: REQUIRED (core functionality)
+439- GPS: Optional (works without, but limited)
+440- Telephony: Optional (works without, no SMS)
+441
+442COMPONENTS DECLARED:
+443
+4441. MainActivity - Main UI entry point
+445   - exported: true (can be launched from launcher)
+446   - Intent filters: MAIN + LAUNCHER
+447
+4482. SpotItForegroundService - Background monitoring
+449   - enabled: true (can be instantiated)
+450   - exported: false (security - no external access)
+451   - foregroundServiceType: location
+452
+453SECURITY CONSIDERATIONS:
+454
+455- Service is not exported (prevents external control)
+456- All dangerous permissions require user grant
+457- Background location justified for core functionality
+458- Location data only used for security alerts
+459
+460ANDROID VERSION COMPATIBILITY:
+461
+462- Min SDK: 26 (Android 8.0)
+463- Target SDK: 35 (Android 15)
+464- POST_NOTIFICATIONS required for API 33+
+465- FOREGROUND_SERVICE_LOCATION required for API 34+
+466- Background location handling varies by Android version
+467
+468FUTURE CONSIDERATIONS:
+469
+4701. Add biometric permission for fingerprint unlock
+4712. Add camera permission for photo capture on alert
+4723. Add microphone permission for audio recording
+4734. Consider adding READ_PHONE_STATE for device info
+4745. May need to update permissions for future Android versions
+475================================================================================
+476-->

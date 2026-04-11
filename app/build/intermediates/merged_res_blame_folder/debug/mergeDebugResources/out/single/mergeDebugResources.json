@@ -1,0 +1,58 @@
+[
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_history.webp.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_history.webp"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-hdpi_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-hdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-xxxhdpi_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-xxxhdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-xxhdpi_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-xxhdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_shield.webp.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_shield.webp"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_home.webp.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_home.webp"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_shield_inset.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_shield_inset.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/drawable_ic_settings.webp.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/drawable/ic_settings.webp"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-mdpi_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-mdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-debug-66:/mipmap-xhdpi_ic_launcher.xml.flat",
+        "source": "/home/panosboy/.gradle/daemon/9.3.1/com.spotit.app-main-68:/mipmap-xhdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "com.spotit.app-debug-66:/drawable_ic_shield_inset.xml.flat",
+        "source": "com.spotit.app-main-68:/drawable/ic_shield_inset.xml"
+    }
+]

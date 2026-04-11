@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.spotit.app-mergeDebugResources-64:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/home/panosboy/.gradle/caches/9.3.1/transforms/a8cbfdfb39996c24f81a9d6ea23ff4be/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

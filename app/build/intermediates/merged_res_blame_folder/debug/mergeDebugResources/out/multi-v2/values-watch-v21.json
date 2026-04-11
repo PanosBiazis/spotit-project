@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.spotit.app-mergeDebugResources-64:/values-watch-v21/values-watch-v21.xml",
+            "map": [
+                {
+                    "source": "/home/panosboy/.gradle/caches/9.3.1/transforms/a8cbfdfb39996c24f81a9d6ea23ff4be/transformed/appcompat-1.6.1/res/values-watch-v21/values-watch-v21.xml",
+                    "from": {
+                        "startLines": "2,6,10",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,271,499",
+                        "endLines": "5,9,13",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "266,494,724"
+                    }
+                }
+            ]
+        }
+    ]
+}
