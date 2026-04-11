@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![SPOTit Logo](app/src/main/res/mipmap-mdpi/ic_launcher.webp)
+![SPOTit Logo](app/src/main/res/drawable/ic_shield.webp)
 
 **A modern Android anti-theft solution with real-time motion detection, GPS tracking, and instant SMS alerts.**
 
