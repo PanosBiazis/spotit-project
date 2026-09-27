@@ -1,0 +1,85 @@
+name: Source validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    name: Repository integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Validate tracked source and package metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import tomllib
+
+          files = [Path(os.fsdecode(p)) for p in subprocess.check_output(
+              ['git', 'ls-files', '-z']).split(b'\0') if p]
+          errors = []
+          source_suffixes = {'.sapp', '.rs', '.py', '.php', '.js', '.ts', '.sh', '.yml', '.yaml', '.toml'}
+          marker = re.compile(rb'^(?:<<<<<<< |>>>>>>> )[^\r\n]+', re.MULTILINE)
+          for path in files:
+              if path.is_symlink() or not path.is_file() or 'fixtures' in path.parts:
+                  continue
+              if path.suffix in source_suffixes and path.stat().st_size <= 8 * 1024 * 1024:
+                  if marker.search(path.read_bytes()):
+                      errors.append(f'{path}: unresolved merge marker')
+
+          for name in ('pblang.toml', 'pblang.lock', 'Cargo.toml', 'package.json'):
+              path = Path(name)
+              if not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+                  data = json.loads(text) if name.endswith('.json') else tomllib.loads(text)
+                  if name == 'pblang.toml':
+                      entry = data.get('package', {}).get('entry')
+                      if entry and not Path(entry).is_file():
+                          errors.append(f'{name}: declared entry does not exist: {entry}')
+              except (ValueError, UnicodeError) as exc:
+                  errors.append(f'{name}: {exc}')
+
+          checksums = Path('FILES.sha256')
+          if checksums.is_file():
+              for line in checksums.read_text(encoding='utf-8').splitlines():
+                  if not line.strip():
+                      continue
+                  match = re.fullmatch(r'([0-9a-fA-F]{64}) [ *](.+)', line)
+                  if not match:
+                      errors.append('FILES.sha256: malformed checksum line')
+                      continue
+                  expected, name = match.groups()
+                  path = Path(name)
+                  if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected.lower():
+                      errors.append(f'FILES.sha256: missing or changed file: {name}')
+
+          for error in errors:
+              print(error)
+          summary = f'Checked {len(files)} tracked paths and available package metadata. '
+          summary += 'This is a source-integrity check; runtime, GUI and device tests are separate.\n'
+          print(summary)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as out:
+              out.write(summary)
+          raise SystemExit(bool(errors))
+          PY
