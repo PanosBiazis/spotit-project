@@ -33,18 +33,22 @@ jobs:
           import re
           import subprocess
           import tomllib
+          import xml.etree.ElementTree as ET
 
           files = [Path(os.fsdecode(p)) for p in subprocess.check_output(
               ['git', 'ls-files', '-z']).split(b'\0') if p]
           errors = []
-          source_suffixes = {'.sapp', '.rs', '.py', '.php', '.js', '.ts', '.sh', '.yml', '.yaml', '.toml'}
+          source_suffixes = {'.sapp', '.rs', '.py', '.php', '.js', '.ts', '.sh', '.yml', '.yaml', '.toml', '.css', '.html', '.htm', '.xml', '.sql', '.java', '.kt', '.kts', '.c', '.h', '.cpp', '.hpp', '.cs', '.go', '.asm', '.lua', '.jsx', '.tsx', '.vue', '.swift', '.rb', '.pl', '.r', '.R', '.ps1'}
           marker = re.compile(rb'^(?:<<<<<<< |>>>>>>> )[^\r\n]+', re.MULTILINE)
           for path in files:
-              if path.is_symlink() or not path.is_file() or 'fixtures' in path.parts:
+              if path.is_symlink() or not path.is_file():
                   continue
               if path.suffix in source_suffixes and path.stat().st_size <= 8 * 1024 * 1024:
                   if marker.search(path.read_bytes()):
                       errors.append(f'{path}: unresolved merge marker')
+
+          def reject_constant(value):
+              raise ValueError(f'non-standard JSON constant: {value}')
 
           for name in ('pblang.toml', 'pblang.lock', 'Cargo.toml', 'package.json'):
               path = Path(name)
@@ -52,17 +56,36 @@ jobs:
                   continue
               try:
                   text = path.read_text(encoding='utf-8')
-                  data = json.loads(text) if name.endswith('.json') else tomllib.loads(text)
+                  data = json.loads(text, parse_constant=reject_constant) if name.endswith('.json') else tomllib.loads(text)
+                  if name == 'Cargo.toml' and 'package' in data:
+                      targets = [Path('src/lib.rs'), Path('src/main.rs')]
+                      targets += list(Path('src/bin').glob('*.rs'))
+                      targets += list(Path('src/bin').glob('*/main.rs'))
+                      targets += [Path(target['path']) for target in data.get('bin', []) if 'path' in target]
+                      if 'path' in data.get('lib', {}):
+                          targets.append(Path(data['lib']['path']))
+                      if not any(target.is_file() for target in targets):
+                          errors.append(f'{name}: package has no existing library or binary target')
                   if name == 'pblang.toml':
                       entry = data.get('package', {}).get('entry')
-                      if entry and not Path(entry).is_file():
-                          errors.append(f'{name}: declared entry does not exist: {entry}')
+                      if entry is not None and (not isinstance(entry, str) or not entry or not Path(entry).is_file()):
+                          errors.append(f'{name}: declared entry must name an existing file: {entry!r}')
               except (ValueError, UnicodeError) as exc:
                   errors.append(f'{name}: {exc}')
 
+          for path in files:
+              if path.name == 'pom.xml' or path.suffix in {'.csproj', '.vbproj', '.fsproj'}:
+                  try:
+                      ET.parse(path)
+                  except (ET.ParseError, OSError) as exc:
+                      errors.append(f'{path}: invalid XML: {exc}')
+
           checksums = Path('FILES.sha256')
           if checksums.is_file():
-              for line in checksums.read_text(encoding='utf-8').splitlines():
+              lines = checksums.read_text(encoding='utf-8').splitlines()
+              if not any(line.strip() for line in lines):
+                  errors.append('FILES.sha256: checksum manifest is empty')
+              for line in lines:
                   if not line.strip():
                       continue
                   match = re.fullmatch(r'([0-9a-fA-F]{64}) [ *](.+)', line)
